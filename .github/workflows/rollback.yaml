@@ -1,0 +1,65 @@
+name: ECS Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      task_definition_name:
+        description: 'Nome da Task Definition ECS'
+        required: true
+        default: 'demo'
+      cluster_name:
+        description: 'Nome do Cluster ECS'
+        required: true
+        default: 'demo-stg'
+      service_name:
+        description: 'Nome do Serviço ECS'
+        required: true
+        default: 'demo'
+      number_revision:
+        description: 'Versão específica da revisão'
+        required: false
+        default: 'latest'
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+
+      - name: Get Latest and Previous Revisions
+        id: latest_previous_revisions
+        if: ${{ github.event.inputs.number_revision == 'latest' }}
+        run: |
+          TASK_DEFINITION_NAME="${{ github.event.inputs.task_definition_name }}"
+          LATEST=$(aws ecs describe-task-definition --task-definition $TASK_DEFINITION_NAME --query 'taskDefinition.revision' --output text)
+          echo "Latest Task Definition Revision: $LATEST"
+          PREVIOUS=$(aws ecs list-task-definitions --family-prefix $TASK_DEFINITION_NAME --sort DESC --max-items 2 --query 'taskDefinitionArns[1]' --output text)
+          echo "Previous Task Definition: $PREVIOUS"
+          echo "::set-output name=task_definition::$PREVIOUS"
+
+      - name: Get Specific Revision
+        id: specific_revision
+        if: ${{ github.event.inputs.number_revision != 'latest' }}
+        run: |
+          TASK_DEFINITION_NAME="${{ github.event.inputs.task_definition_name }}"
+          SPECIFIC_REVISION="${{ github.event.inputs.number_revision }}" 
+          TASK_DEFINITION_ARN=$(aws ecs describe-task-definition --task-definition ${TASK_DEFINITION_NAME}:${SPECIFIC_REVISION} --query 'taskDefinition.taskDefinitionArn' --output text)
+          echo "Task Definition ARN for Revision ${SPECIFIC_REVISION}: $TASK_DEFINITION_ARN"
+          echo "::set-output name=task_definition::$TASK_DEFINITION_ARN"
+
+      - name: Update ECS Service to Selected Task Definition
+        run: |
+          SERVICE_NAME="${{ github.event.inputs.service_name }}"
+          CLUSTER_NAME="${{ github.event.inputs.cluster_name }}"
+          TASK_DEFINITION_ARN="${{ steps.latest_previous_revisions.outputs.task_definition || steps.specific_revision.outputs.task_definition }}"
+          echo "Updating service $SERVICE_NAME on cluster $CLUSTER_NAME to use task definition $TASK_DEFINITION_ARN"
+          aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --task-definition $TASK_DEFINITION_ARN

@@ -1,0 +1,45 @@
+{
+    "executionRoleArn": "arn:aws:iam::000000000000:role/demo-task-execution-role",
+    "containerDefinitions": [
+        {
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/demo-logs",
+                    "awslogs-region": "us-west-2",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "portMappings": [
+                {
+                    "hostPort": 80,
+                    "protocol": "tcp",
+                    "containerPort": 80
+                }
+            ],
+            "cpu": 0,
+            "environment": [
+                {
+                    "name": "ENVIRONMENT",
+                    "value": "production"
+                }
+            ],
+            "mountPoints": [],
+            "secrets": [],
+            "volumesFrom": [],
+            "image": "$(image-task-definition)",
+            "essential": true,
+            "name": "demo-task"
+        }
+    ],
+    "placementConstraints": [],
+    "memory": "2048",
+    "taskRoleArn": "arn:aws:iam::000000000000:role/demo-task-role",
+    "family": "demo",
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "networkMode": "awsvpc",
+    "cpu": "1024",
+    "volumes": []
+}
