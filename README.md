@@ -1,4 +1,4 @@
-Projeto de Bootstrap de Cluster ECS
+# Projeto de Bootstrap de Cluster ECS
 
 Este repositório contém uma coleção de scripts e configurações de infraestrutura como código (IaC) para provisionar e configurar um cluster ECS (Elastic Container Service) na AWS, utilizando o Terraform como ferramenta de provisionamento.
 Visão Geral
@@ -16,13 +16,13 @@ Este projeto configura a infraestrutura básica necessária para executar um clu
 - Pipeline de Deploy: Configuração de uma pipeline de deploy usando GitHub Actions ou AWS CodePipeline para automatizar a entrega contínua.
 - Rollback: Instruções de rollback para reverter a versão da task definition em caso de falha no deploy.
 
-Estrutura do Projeto
+## Estrutura do Projeto
 
 A estrutura do repositório é organizada da seguinte forma:
 
 
 
-Pré-requisitos
+## Pré-requisitos
 
 Antes de iniciar, certifique-se de ter os seguintes itens instalados e configurados:
 
@@ -30,7 +30,7 @@ Antes de iniciar, certifique-se de ter os seguintes itens instalados e configura
 - AWS CLI com perfil configurado
 - Conta AWS com permissões para criar recursos ECS, IAM, VPC e de rede
 
-Configuração da Aplicação no ECS
+## Configuração da Aplicação no ECS
 
 A aplicação no ECS é configurada com uma definição de tarefa (task definition) que descreve o container e seu ambiente. Esta configuração pode incluir:
 
@@ -39,6 +39,6 @@ A aplicação no ECS é configurada com uma definição de tarefa (task definiti
 - Configuração de rede (subnets, security groups).
 - Service ECS: garante que a aplicação esteja sempre em execução com o número desejado de instâncias.
 
-Considerações Finais
+## Considerações Finais
 
 Este projeto fornece a base de infraestrutura para rodar workloads no ECS. Dependendo das necessidades da aplicação, outros recursos podem ser necessários, como balanceadores de carga, integração com RDS ou outros serviços gerenciados pela AWS.
